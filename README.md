@@ -263,7 +263,7 @@ In the following graph, the training curve shows a smooth decline, while the tes
 
 
 
-### Model analysis
+### Final model analysis
 
 Network Topology Description
 
@@ -293,7 +293,7 @@ l2 applies 16 filters of size 3x3 with the ReLU activation function. This layer'
 
 **Total Number of Parameters:**
 $$
-80 + 1168 + 157000 + 2010 = 159'258
+80 + 1168 + 157000 + 2010 = 160’258
 $$
 
 
