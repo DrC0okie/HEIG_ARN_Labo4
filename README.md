@@ -2,9 +2,9 @@
 
 
 
-**Date : ** 05/04/2024
+**Date :** 05/04/2024
 
-**Authors : ** Jarod Streckeisen, Timothée Van Hove
+**Authors :** Jarod Streckeisen, Timothée Van Hove
 
 
 
@@ -13,21 +13,23 @@
 
 ### What is the learning algorithm being used to optimize the weights of the neural networks? 
 
-Backpropagation
+The learning algorithm is called Backpropagation.
+
+Backpropagation is a gradient estimation method used to train MLP . The gradient estimate is used by the optimization algorithm to compute the network parameter updates.
 
 ### What are the parameters (arguments) being used by that algorithm? 
 
-Learning Rate: This parameter controls the step size of the weight updates during optimization. It determines how much the weights are adjusted in the direction opposite to the gradient. A larger learning rate may lead to faster convergence but can also cause instability or overshooting of the optimal solution, while a smaller learning rate may result in slower convergence but more stable updates.
+**Learning Rate**: This parameter controls the step size of the weight updates during optimization. It determines how much the weights are adjusted in the direction opposite to the gradient. A larger learning rate may lead to faster convergence but can also cause instability or overshooting of the optimal solution, while a smaller learning rate may result in slower convergence but more stable updates.
 
-Activation Functions: These are the nonlinear functions applied to the output of each neuron in the network. Common activation functions include sigmoid, tanh, ReLU, and softmax. The choice of activation function affects the model's representational capacity and gradient flow during backpropagation.
+**Activation Functions**: These are the nonlinear functions applied to the output of each neuron in the network. Common activation functions include sigmoid, tanh, ReLU, and softmax. The choice of activation function affects the model's representational capacity and gradient flow during backpropagation.
 
-Loss Function: This function quantifies the difference between the predicted output and the actual output of the network. It serves as the objective that the optimization algorithm aims to minimize during training. Common loss functions include mean squared error (MSE), binary cross-entropy, and categorical cross-entropy.
+**Loss Function**: This function quantifies the difference between the predicted output and the actual output of the network. It serves as the objective that the optimization algorithm aims to minimize during training. Common loss functions include mean squared error (MSE), binary cross-entropy, and categorical cross-entropy.
 
-Optimizer: This is the optimization algorithm used to update the weights of the network based on the gradients computed during backpropagation. Popular optimizers include stochastic gradient descent (SGD), Adam, RMSprop, and Adagrad. Each optimizer has its own parameters, such as momentum, decay rates, and adaptive learning rates, which can affect training performance.
+**Optimizer**: This is the optimization algorithm used to update the weights of the network based on the gradients computed during backpropagation. Popular optimizers include stochastic gradient descent (SGD), Adam, RMSprop, and Adagrad. Each optimizer has its own parameters, such as momentum, decay rates, and adaptive learning rates, which can affect training performance.
 
-Initialization Method: This parameter determines how the weights of the neural network are initialized before training begins. Common initialization methods include random initialization, Xavier initialization, and He initialization. Proper initialization can help prevent vanishing or exploding gradients and improve training stability.
+**Initialization Method**: This parameter determines how the weights of the neural network are initialized before training begins. Common initialization methods include random initialization, Xavier initialization, and He initialization. Proper initialization can help prevent vanishing or exploding gradients and improve training stability.
 
-Regularization: Regularization techniques, such as L1 regularization, L2 regularization, and dropout, are used to prevent overfitting by penalizing large weights or introducing noise during training. These regularization techniques often involve additional hyperparameters, such as the regularization strength or dropout rate.
+**Regularization**: Regularization techniques, such as L1 regularization, L2 regularization, and dropout, are used to prevent overfitting by penalizing large weights or introducing noise during training. These regularization techniques often involve additional hyperparameters, such as the regularization strength or dropout rate.
 
 
 ### What loss function is being used ? Please, give the equation(s)
@@ -50,8 +52,6 @@ Add 2 hidden layers of 5 neurons
 model.add(Dense(6,input_shape=(784,), activation='relu'))
 model.add(Dense(6,input_shape=(784,), activation='relu'))
 ```
-
-
 
 
 ## Experiment 2: Digit recognition from features of the input data
