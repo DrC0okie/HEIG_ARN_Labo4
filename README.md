@@ -2,7 +2,7 @@
 
 
 
-**Date :** 05/04/2024
+**Date :** 06/05/2024
 
 **Authors :** Jarod Streckeisen, Timothée Van Hove
 
@@ -46,18 +46,127 @@ Change epoch from 3 to 20
 
 Change optimizer from RMSProp to ADAM
 
-Add 2 hidden layers of 5 neurons
+Add 2 hidden layers of 6 neurons
 
 ```python
 model.add(Dense(6,input_shape=(784,), activation='relu'))
 model.add(Dense(6,input_shape=(784,), activation='relu'))
 ```
+#### Model Summary
 
+![](images/ex_1/model_summary.png)
+
+#### Training history
+
+![](images/ex_1/training_history.png)
+
+#### Confusion matrix
+
+![](images/ex_1/confusion_matrix.png)
+
+Test score: 0.9499756097793579
+Test accuracy: 0.7037000060081482
+
+#### Weights
+
+Number of weights : 1700 
+
+Input : 1570
+
+First layer : 6 * 2 + 6 bias \
+Second layer : 6 * 6 + 6 bias \
+Output : 6 * 10 + 10 bias
+
+Total bias : 22 bias
 
 ## Experiment 2: Digit recognition from features of the input data
 
+### Enhanced model pix_p_cell = 4
+
+- Add hidden layer of 8 neurons
+- RMSProp -> ADAM
+- 3 epoch -> 80 epoch
+- pix_p_cell = 4
+- n_orientations = 8
+
+#### Model Summary
+
+![](images/ex_2/model_summary.png)
+
+#### Training history
+
+![](images/ex_2/4ppx_training_history.png)
+
+#### Confusion matrix
+
+![](images/ex_2/4ppx_confusion_matrix.png)
+
+Test score: 0.563103437423706 \
+Test accuracy: 0.8149999976158142
+
+### Enhanced model pix_p_cell = 7
+
+- Add hidden layer of 8 neurons
+- RMSProp -> ADAM
+- 3 epoch -> 80 epoch
+- pix_p_cell = 7
+- n_orientations = 8
+
+#### Model Summary
+
+![](images/ex_2/model_summary.png)
+
+#### Training history
+
+![](images/ex_2/7ppx_training_history.png)
+
+#### Confusion matrix
+
+![](images/ex_2/7ppx_confusion_matrix.png)
+
+Test score: 0.774817705154419 \
+Test accuracy: 0.7207000255584717
 
 
+### Enhanced model pix_p_cell = 2
+
+- Add hidden layer of 8 neurons
+- RMSProp -> ADAM
+- 3 epoch -> 80 epoch
+- pix_p_cell = 2
+- n_orientations = 8
+
+#### Model Summary
+
+![](images/ex_2/model_summary.png)
+
+#### Training history
+
+![](images/ex_2/2ppx_training_history.png)
+
+#### Confusion matrix
+
+![](images/ex_2/2ppx_confusion_matrix.png)
+  
+Test score: 0.5716031789779663 \
+Test accuracy: 0.8219000101089478
+
+
+### Changing n_orientations
+
+Too much n_orientations (32) reduce model accuracy
+
+![](images/ex_2/32ort_training_history.png)
+
+
+
+
+### Final model
+
+
+### Analysis
+
+Lower pix_p_cell lead to more resolution and thus better accuracy of the model.
 
 
 ## Experiment 3: CNN
