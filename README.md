@@ -6,52 +6,72 @@
 
 **Authors :** Jarod Streckeisen, Timothée Van Hove
 
+## What is the learning algorithm being used to optimize the weights of the neural networks? 
+
+The algorithm used to optimize the weight is RMSprop (Root Mean Square Propagation).
 
 
-## Experiment 1: Digit recognition from raw data
+## What are the parameters (arguments) being used by that algorithm? 
 
+From the Keras documentation
 
-### What is the learning algorithm being used to optimize the weights of the neural networks? 
+**learning_rate**: A float, a keras.optimizers.schedules.LearningRateSchedule instance, or a callable that takes no arguments and returns the actual value to use. The learning rate. Defaults to 0.001.
 
-The learning algorithm is called Backpropagation.
+**rho**: float, defaults to 0.9. Discounting factor for the old gradients.
 
-Backpropagation is a gradient estimation method used to train MLP . The gradient estimate is used by the optimization algorithm to compute the network parameter updates.
+**momentum** : float, defaults to 0.0. If not 0.0., the optimizer tracks the momentum value, with a decay rate equals to 1 - momentum.
 
-### What are the parameters (arguments) being used by that algorithm? 
+**epsilon**: A small constant for numerical stability. Defaults to 1e-7.
 
-**Learning Rate**: This parameter controls the step size of the weight updates during optimization. It determines how much the weights are adjusted in the direction opposite to the gradient. A larger learning rate may lead to faster convergence but can also cause instability or overshooting of the optimal solution, while a smaller learning rate may result in slower convergence but more stable updates.
+**centered**: Boolean. If True, gradients are normalized by the estimated variance of the gradient; if False, by the uncentered second moment. Setting this to True may help with training, but is slightly more expensive in terms of computation and memory. Defaults to False.
 
-**Activation Functions**: These are the nonlinear functions applied to the output of each neuron in the network. Common activation functions include sigmoid, tanh, ReLU, and softmax. The choice of activation function affects the model's representational capacity and gradient flow during backpropagation.
+**name**: String. The name to use for momentum accumulator weights created by the optimizer.
 
-**Loss Function**: This function quantifies the difference between the predicted output and the actual output of the network. It serves as the objective that the optimization algorithm aims to minimize during training. Common loss functions include mean squared error (MSE), binary cross-entropy, and categorical cross-entropy.
+**weight_decay**: Float. If set, weight decay is applied.
 
-**Optimizer**: This is the optimization algorithm used to update the weights of the network based on the gradients computed during backpropagation. Popular optimizers include stochastic gradient descent (SGD), Adam, RMSprop, and Adagrad. Each optimizer has its own parameters, such as momentum, decay rates, and adaptive learning rates, which can affect training performance.
+**clipnorm**: Float. If set, the gradient of each weight is individually clipped so that its norm is no higher than this value.
 
-**Initialization Method**: This parameter determines how the weights of the neural network are initialized before training begins. Common initialization methods include random initialization, Xavier initialization, and He initialization. Proper initialization can help prevent vanishing or exploding gradients and improve training stability.
+**clipvalue**: Float. If set, the gradient of each weight is clipped to be no higher than this value.
 
-**Regularization**: Regularization techniques, such as L1 regularization, L2 regularization, and dropout, are used to prevent overfitting by penalizing large weights or introducing noise during training. These regularization techniques often involve additional hyperparameters, such as the regularization strength or dropout rate.
+**global_clipnorm**: Float. If set, the gradient of all weights is clipped so that their global norm is no higher than this value.
 
+**use_ema**: Boolean, defaults to False. If True, exponential moving average (EMA) is applied. EMA consists of computing an exponential moving average of the weights of the model (as the weight values change after each training batch), and periodically overwriting the weights with their moving average.
 
-### What loss function is being used ? Please, give the equation(s)
+**ema_momentum**: Float, defaults to 0.99. Only used if use_ema=True. This is the momentum to use when computing the EMA of the model's weights: new_average = ema_momentum * old_average + (1 - ema_momentum) * current_variable_value.
+
+**ema_overwrite_frequency**: Int or None, defaults to None. Only used if use_ema=True. Every ema_overwrite_frequency steps of iterations, we overwrite the model variable by its moving average. If None, the optimizer does not overwrite model variables in the middle of training, and you need to explicitly overwrite the variables at the end of training by calling optimizer.finalize_variable_values() (which updates the model variables in-place). When using the built-in fit() training loop, this happens automatically after the last epoch, and you don't need to do anything.
+
+**loss_scale_factor**: Float or None. If a float, the scale factor will be multiplied the loss before computing gradients, and the inverse of the scale factor will be multiplied by the gradients before updating variables. Useful for preventing underflow during mixed precision training. Alternately, keras.optimizers.LossScaleOptimizer will automatically set a loss scale factor.
+
+**gradient_accumulation_steps**: Int or None. If an int, model & optimizer variables will not be updated at every step; instead they will be updated every gradient_accumulation_steps steps, using the average value of the gradients since the last update. This is known as "gradient accumulation". This can be useful when your batch size is very small, in order to reduce gradient noise at each update step.
+
+## What loss function is being used ? Please, give the equation(s)
 
 categorical_crossentropy
 
 ![](./images/equation.png)
 
-### Final model 
 
-Changed activation function from sigmoid to relu 
+## Experiment 1: Digit recognition from raw data
 
-Change epoch from 3 to 20 
+### Enhanced model
 
-Change optimizer from RMSProp to ADAM
+- Activation function sigmoid -> ReLu
+- Number of epoch 3 -> 20
+- Optimizer RMSProp -> ADAm
 
-Add 2 hidden layers of 6 neurons
+### Number of neurons & layers
+
+Adding two layers of 6 neurons was the best compromise we found.
 
 ```python
 model.add(Dense(6,input_shape=(784,), activation='relu'))
 model.add(Dense(6,input_shape=(784,), activation='relu'))
 ```
+More neurons didn't improve accuracy, same for more layers. Two layers was a bit better than a single one.
+
+### Final model 
+
 #### Model Summary
 
 ![](images/ex_1/model_summary.png)
@@ -66,6 +86,11 @@ model.add(Dense(6,input_shape=(784,), activation='relu'))
 
 Test score: 0.9499756097793579
 Test accuracy: 0.7037000060081482
+
+#### Mismatch sample
+
+![](images/ex_1/mismatch.png)
+
 
 #### Weights
 
@@ -154,19 +179,48 @@ Test accuracy: 0.8219000101089478
 
 ### Changing n_orientations
 
-Too much n_orientations (32) reduce model accuracy
+Too much n_orientations (i.e 32) reduce model accuracy
 
 ![](images/ex_2/32ort_training_history.png)
 
-
-
-
 ### Final model
+
+The best model is the one with 2 pix_p_cell.
+
+- Add hidden layer of 8 neurons
+- RMSProp -> ADAM
+- 3 epoch -> 80 epoch
+- pix_p_cell = 2
+- n_orientations = 8
+
+#### Model Summary
+
+![](images/ex_2/model_summary.png)
+
+#### Training history
+
+![](images/ex_2/2ppx_training_history.png)
+
+#### Confusion matrix
+
+![](images/ex_2/2ppx_confusion_matrix.png)
+  
+Test score: 0.5716031789779663 \
+Test accuracy: 0.8219000101089478
+
+#### Mismatch sample
+
+![](images/ex_2/mismatch.png)
+
 
 
 ### Analysis
 
-Lower pix_p_cell lead to more resolution and thus better accuracy of the model.
+Lower pix_p_cell lead to more resolution and thus better accuracy of the model. It is important to have a high number of orientation if we have a high pix_p_cell to better differenciate HOGs. 
+
+HOG are generated very slowly when n_orientation and pix_p_cell are small. 
+
+When n_orientations = 1 and pix_p_cell = 2, it takes approximately 20 minutes to generate train and test data.
 
 
 ## Experiment 3: CNN
