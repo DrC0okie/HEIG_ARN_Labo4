@@ -56,81 +56,78 @@ output:
 
 \tableofcontents
 
+
+
+## Introduction
+
+In the first part of this practical work, we will use three different ways to classify images of digits from the `MNIST` dataset : MLP, MLP from Histogram Of Gradients (HOG) and convolutional neural network (CNN). 
+
+In a second time, we are going to create another CNN to classify chest x-ray between normal and pneumonia.
+
+This practical work has been made using the Keras framework, a high-level neural networks library, written in Python, capable of running on top of TensorFlow.
+
+
+
 \pagebreak
+
+
 
 ## Introductive questions
 
 > Question: *What is the learning algorithm being used to optimize the weights of the neural networks, and what are the parameters (arguments) being used by that algorithm?* 
 
-The algorithm used to optimize the weight is RMSprop (Root Mean Square Propagation). We can find the arguments from the Keras documentation:
+The algorithm used to optimize the weight is RMSprop (Root Mean Square Propagation). According to the keras documentation, these are the default parameters used:
 
-> **learning_rate**: A float, a keras.optimizers.schedules.LearningRateSchedule instance, or a callable that takes no arguments and returns the actual value to use. The learning rate. Defaults to 0.001.
->
-> **rho**: float, defaults to 0.9. Discounting factor for the old gradients.
->
-> **momentum** : float, defaults to 0.0. If not 0.0., the optimizer tracks the momentum value, with a decay rate equals to 1 - momentum.
->
-> **epsilon**: A small constant for numerical stability. Defaults to 1e-7.
->
-> **centered**: Boolean. If True, gradients are normalized by the estimated variance of the gradient; if False, by the uncentered second moment. Setting this to True may help with training, but is slightly more expensive in terms of computation and memory. Defaults to False.
->
-> **name**: String. The name to use for momentum accumulator weights created by the optimizer.
->
-> **weight_decay**: Float. If set, weight decay is applied.
->
-> **clipnorm**: Float. If set, the gradient of each weight is individually clipped so that its norm is no higher than this value.
->
-> **clipvalue**: Float. If set, the gradient of each weight is clipped to be no higher than this value.
->
-> **global_clipnorm**: Float. If set, the gradient of all weights is clipped so that their global norm is no higher than this value.
->
-> **use_ema**: Boolean, defaults to False. If True, exponential moving average (EMA) is applied. EMA consists of computing an exponential moving average of the weights of the model (as the weight values change after each training batch), and periodically overwriting the weights with their moving average.
->
-> **ema_momentum**: Float, defaults to 0.99. Only used if use_ema=True. This is the momentum to use when computing the EMA of the model's weights: new_average = ema_momentum * old_average + (1 - ema_momentum) * current_variable_value.
->
-> **ema_overwrite_frequency**: Int or None, defaults to None. Only used if use_ema=True. Every ema_overwrite_frequency steps of iterations, we overwrite the model variable by its moving average. If None, the optimizer does not overwrite model variables in the middle of training, and you need to explicitly overwrite the variables at the end of training by calling optimizer.finalize_variable_values() (which updates the model variables in-place). When using the built-in fit() training loop, this happens automatically after the last epoch, and you don't need to do anything.
->
-> **loss_scale_factor**: Float or None. If a float, the scale factor will be multiplied the loss before computing gradients, and the inverse of the scale factor will be multiplied by the gradients before updating variables. Useful for preventing underflow during mixed precision training. Alternately, keras.optimizers.LossScaleOptimizer will automatically set a loss scale factor.
->
-> **gradient_accumulation_steps**: Int or None. If an int, model & optimizer variables will not be updated at every step; instead they will be updated every gradient_accumulation_steps steps, using the average value of the gradients since the last update. This is known as "gradient accumulation". This can be useful when your batch size is very small, in order to reduce gradient noise at each update step.
-
-
-
-\pagebreak
+```python
+tf.keras.optimizers.RMSprop(
+    learning_rate=0.001,
+    rho=0.9,
+    momentum=0.0,
+    epsilon=1e-07,
+    centered=False,
+    weight_decay=None,
+    clipnorm=None,
+    clipvalue=None,
+    global_clipnorm=None,
+    use_ema=False,
+    ema_momentum=0.99,
+    ema_overwrite_frequency=None,
+    jit_compile=True,
+    name="RMSprop",
+    **kwargs
+)
+```
 
 
 
 > Question: *What loss function is being used ? Please, give the equation(s)*
 
-The categorical crossentropy. This loss for a single sample with true label in one-hot encoded form and the predicted probabilities can be defined as follows:
+The categorical crossentropy is used. This loss function is used for classification tasks where labels are one-hot encoded. The categorical crossentropy loss, $L$, for a single sample is given by:
 
-$$
-L = -\sum_{c=1}^{N} y_{o,c} \log(p_{o,c})
-$$
-Where:
+\begin{equation}
+L = -\sum_{c=1}^C y_c \log(\hat{y}_c)
+\end{equation}
 
-- `L` is the loss for a single example.
-- `N` is the number of classes.
-- `y o,c` is a binary indicator (0 or 1) if class label `c` is the correct classification for observation `o`
-- `p o,c` is the predicted probability of observation `o` being of class `c`.
-
-
-
-**Mean Categorical Crossentropy Loss:** To calculate the loss over a batch of data, the mean loss across all observations `N` is used:
-$$
-L_{\text{mean}} = -\frac{1}{N} \sum_{o=1}^{N} \sum_{c=1}^{M} y_{o,c} \log(p_{o,c})
-$$
-Where:
-
-- `L mean` is the mean loss over a batch of data.
-- `N` is the number of observations in the batch.
-- `M` is the number of classes.
-- `y o,c` is a binary indicator (0 or 1) if class label `c` is the correct classification for observation `o`.
-- `p o,c` is the predicted probability of observation `o` being of class `c`.
+where:
+\begin{itemize}
+    \item $C$ is the number of classes.
+    \item $y_c$ is the true probability of the sample belonging to class $c$, which in the case of one-hot encoding, is 1 for the true class and 0 for all other classes.
+    \item $\hat{y}_c$ is the predicted probability of the sample belonging to class $c$, as output by the model.
+\end{itemize}
 
 
 
-This form aggregates the losses for each class prediction into a single scalar value, which represents the average loss per observation in the batch.
+For a dataset with multiple samples, the total categorical crossentropy loss is often computed as the mean of the losses for individual samples:
+
+\begin{equation}
+L_{total} = -\frac{1}{N}\sum_{i=1}^N \sum_{c=1}^C y_{i,c} \log(\hat{y}_{i,c})
+\end{equation}
+
+where:
+\begin{itemize}
+    \item $N$ is the number of samples in the dataset.
+    \item $y_{i,c}$ and $\hat{y}_{i,c}$ are the true and predicted probabilities for the $i$-th sample and class $c$, respectively.
+\end{itemize}
 
 
 
@@ -247,18 +244,18 @@ Digit 8: 39.12%
 
 ### 1. Enhanced model pix_p_cell = 4
 
-- Add hidden layer of 8 neurons
-- RMSProp -> ADAM
-- 3 epoch -> 80 epoch
-- pix_p_cell = 4
-- n_orientations = 8
-- batch size = 128
+| Model    | Dense layer 2 | Optimizer | # epochs | pix_p_cell | # orientations | batch size |
+| -------- | ------------- | --------- | -------- | ---------- | -------------- | ---------- |
+| Original | -             | RMSProp   | 3        | 4          | 8              | 128        |
+| Tuned    | 8 neurons     | ADAM      | 80       | 4          | 8              | 128        |
+
+
 
 #### Training history
 
 \begin{figure}[!htb]
     \centering
-    \includegraphics[width=0.4\textwidth]{/home/tim/Documents/HEIG/ARN/labos/HEIG_ARN_Labo4/images/ex_2/4ppx_training_history.png}
+    \includegraphics[width=0.45\textwidth]{/home/tim/Documents/HEIG/ARN/labos/HEIG_ARN_Labo4/images/ex_2/4ppx_training_history.png}
 \end{figure}
 
 
@@ -272,18 +269,18 @@ Test accuracy: ~0.814
 
 ### 2. Enhanced model pix_p_cell = 7
 
-- Add hidden layer of 8 neurons
-- RMSProp -> ADAM
-- 3 epoch -> 80 epoch
-- pix_p_cell = 7
-- n_orientations = 8
-- batch size = 128
+| Model    | Dense layer 2 | Optimizer | # epochs | pix_p_cell | # orientations | batch size |
+| -------- | ------------- | --------- | -------- | ---------- | -------------- | ---------- |
+| Original | -             | RMSProp   | 3        | 4          | 8              | 128        |
+| Tuned    | 8 neurons     | ADAM      | 80       | 7          | 8              | 128        |
+
+
 
 #### Training history
 
 \begin{figure}[!htb]
     \centering
-    \includegraphics[width=0.4\textwidth]{/home/tim/Documents/HEIG/ARN/labos/HEIG_ARN_Labo4/images/ex_2/7ppx_training_history.png}
+    \includegraphics[width=0.45\textwidth]{/home/tim/Documents/HEIG/ARN/labos/HEIG_ARN_Labo4/images/ex_2/7ppx_training_history.png}
 \end{figure}
 
 
@@ -301,25 +298,26 @@ Test accuracy: ~0.720
 
 ### 3. Changing n_orientations
 
-Too much n_orientations (i.e 32) reduce model accuracy
+| Model    | Dense layer 2 | Optimizer | # epochs | pix_p_cell | # orientations | batch size |
+| -------- | ------------- | --------- | -------- | ---------- | -------------- | ---------- |
+| Original | -             | RMSProp   | 3        | 4          | 8              | 128        |
+| Tuned    | 8 neurons     | ADAM      | 80       | 7          | 32             | 128        |
 
 \begin{figure}[!htb]
     \centering
-    \includegraphics[width=0.4\textwidth]{/home/tim/Documents/HEIG/ARN/labos/HEIG_ARN_Labo4/images/ex_2/32ort_training_history.png}
+    \includegraphics[width=0.45\textwidth]{/home/tim/Documents/HEIG/ARN/labos/HEIG_ARN_Labo4/images/ex_2/32ort_training_history.png}
 \end{figure}
 
 
 
 ### 4. Best Model: pix_p_cell = 2
 
-Those parameters have been tuned to enhance the model performance:
+| Model    | Dense layer 2 | Optimizer | # epochs | pix_p_cell | # orientations | batch size |
+| -------- | ------------- | --------- | -------- | ---------- | -------------- | ---------- |
+| Original | -             | RMSProp   | 3        | 4          | 8              | 128        |
+| Tuned    | 8 neurons     | ADAM      | 80       | 2          | 8              | 128        |
 
-- Add hidden layer of 8 neurons
-- RMSProp -> ADAM
-- 3 epoch -> 80 epoch
-- pix_p_cell = 2
-- n_orientations = 8
-- batch size = 128
+
 
 #### Architecture
 
@@ -806,9 +804,38 @@ Digit 9: 98.32%
 
 
 
-## Comparison of the experiments on MNIST dataset
+## Comparison of the experiments and questions
 
-After analyzing those 3 experiments, it is clear that the complexity of the model and the nature of the feature representation are essential to the performance in digit recognition. While shallow networks quickly reach their performance limits, deeper architectures like CNNs with advanced feature engineering (like HOG) or inherent feature extraction capabilities show big improvements in accuracy and loss. However, more complex models require more CPU resources and training time but they yield much better results. The experiment with the CNN showed the power of layer depth, neuron count, and dropout in resulting in high accuracy and making it the best performer.
+After analyzing those 3 experiments, it is clear that the complexity of the model and the feature representation are important for the classification performance. Shallow networks quickly reach their performance limits, while deeper architectures like CNN show big improvements in accuracy and loss. However, more complex models require more CPU resources (and training time) but they give much better results. The experiment with the CNN showed the power of layer depth, neuron count, and dropout resulting in high accuracy and making it the best performer.
+
+> Question: *The CNNs models are deeper (have more layers), do they have more weights than the shallow ones? explain with one example.*
+
+I our 3 experiments, yes, the shallow models have less weight than the deeper CNN model, however, the relationship between the depth of a convolutional neural network (CNN) and the number of weights (parameters) it contains **is not strictly linear**. Deeper networks have generally more layers, which could result in more parameters. However, the size of the layers and the kernel size of the filters also affect the total parameter count.
+
+Furthermore, CNN include layers that do not increase the parameter count (pooling layers and dropout layers). These layers help in reducing the dimensionality of the data passing through the network without adding weights.
+
+Finally, we must take into account the manner how layers are connected. For example, a densely connected layer will have more parameters than a convolutional layer with the same number of output units because each unit in a dense layer connects to all units in the previous layer.
+
+#### Example:
+
+1. **Shallow Neural Network (Model A):**
+   - **Input Layer:** Flattened input of 784 (28x28 pixels)
+   - **Dense Layer 1:** 128 neurons
+   - **Output Layer:** 10 neurons (one for each digit)
+   - **Total Parameters:** Parameters in Dense Layer 1 = 784 * 128 + 128 (bias) = 100,480 Parameters in Output Layer = 128 * 10 + 10 (bias) = 1,290 **Total for Model A = 100,480 + 1,290 = 101,770**
+2. **Deeper CNN (Model B):**
+   - **Input Layer:** 28x28 pixels, no flattening
+   - **Conv Layer 1:** 32 filters of size 3x3, stride 1 (padding 'same')
+   - **Pooling Layer 1:** 2x2, stride 2
+   - **Conv Layer 2:** 64 filters of size 3x3, stride 1 (padding 'same')
+   - **Output Layer:** 10 neurons
+   - **Total Parameters:** Parameters in Conv Layer 1 = (3 * 3 * 1 * 32) + 32 (bias) = 320 Parameters in Conv Layer 2 = (3 * 3 * 32 * 64) + 64 (bias) = 18,496 Parameters in Output Layer = (Assuming a flattening step produces 64 features): 64 * 10 + 10 (bias) = 650 **Total for Model B = 320 + 18,496 + 650 = 19,466**
+
+In this example, despite having fewer layers, the shallow network (Model A) has more parameters than the deeper CNN (Model B). This difference is explained because the dense layers in the shallow model connect each input to each neuron, resulting in a high number of parameters. In the other hand, the convolutional layers in the deeper CNN model only connect each filter to a local region of the input image, and this reduces the number of parameters despite the increase in depth.
+
+
+
+\pagebreak
 
 
 
@@ -831,13 +858,11 @@ The goal of this experiment is to evaluate the performance of a CNN designed to 
 
 ### 1. Model Architecture
 
-The CNN model consists of 5 convolutional layers, each one followed by max pooling layers, and it follows by 2 fully connected (dense) layers. The convolutional layers are designed to extract spatial hierarchies of features from the images, while the dense layers classify these features into the two categories.
-
 
 
 \begin{figure}[!htb]
     \centering
-    \includegraphics[width=0.30\textwidth]{/home/tim/Documents/HEIG/ARN/labos/HEIG_ARN_Labo4/images/ex_4/model.png}
+    \includegraphics[width=0.34\textwidth]{/home/tim/Documents/HEIG/ARN/labos/HEIG_ARN_Labo4/images/ex_4/model.png}
 \end{figure}
 
 
@@ -917,15 +942,3 @@ The good performance on the validation set in the first epochs, followed by a pe
 The test results show that while the model has learned to classify, its accuracy is still poor. We could have better results by further tuning the model, specifically with data augmentation to improve its ability to generalize to new, unseen data.
 
 A bigger validation set would provide a more solid basis for tuning and evaluating the model. Implementing more complex augmentation techniques could help the model generalize better from the training data. We could also use dropout regularization to reduce the overfitting. Finally, longer training with early stopping would allow the model to stabilize its performance on the training and validation datasets.
-
-
-
-## PW4 Questions and conclusion
-
-### Deeper vs. Shallower Models
-
-**Deeper models** (like the current one with multiple convolution and dense layers) generally have more weights due to increased layers and complexity, which allows them to learn more detailed features from the data. However, deeper models also require more computational resources and are more prone to overfitting, which needs strategies like dropout. **Shallower models** might have fewer parameters, making them quicker to train and less prone to overfitting but potentially less capable of learning complex patterns.
-
-#### Example:
-
-TODO 
